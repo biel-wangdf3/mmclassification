@@ -106,8 +106,11 @@ def main():
         cfg.work_dir = args.work_dir
     elif cfg.get('work_dir', None) is None:
         # use config filename as default work_dir if cfg.work_dir is None
+        import time
+
+        data = time.strftime("%Y-%m-%d", time.localtime())
         cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
+                                osp.splitext(osp.basename(args.config))[0] + '_' + data)   # add yymmdd
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
     if args.gpus is not None:
@@ -198,6 +201,10 @@ def main():
         device=args.device,
         meta=meta)
 
+    # only reserve the best pth to add dvc control
+    os.system(f'find {cfg.work_dir} -name "*.pth" | grep -v best_* | xargs rm')
 
 if __name__ == '__main__':
+    # import os
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     main()

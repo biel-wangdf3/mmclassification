@@ -1,0 +1,5 @@
+outs:
+- md5: d232cbbce53ee186c6b76b42b6062f48.dir
+  size: 1074380369
+  nfiles: 5
+  path: work_dirs
