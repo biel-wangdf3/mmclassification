@@ -2,7 +2,7 @@ _base_ = [
     # '../_base_/models/vgg16bn.py',
     # '../_base_/datasets/imagenet_bs32_pil_resize.py',
     # '../_base_/schedules/imagenet_bs256.py', 
-    '../_base_/default_runtime.py'
+    # '../_base_/default_runtime.py'
 ]
 
 
@@ -47,21 +47,28 @@ data = dict(
     workers_per_gpu=4,    # the number of threads per GPU when building dataloader
     train=dict(
         type=dataset_type,
-        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/base_dataset',
+        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/train_base_dataset',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/base_dataset',
+        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/train_base_dataset',
         # ann_file='data/imagenet/meta/val.txt',
         pipeline=test_pipeline),
     test=dict(
         # replace `data/val` with `data/test` for standard test
         type=dataset_type,
-        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/base_dataset',
+        data_prefix='/home/wdf/workspace/open-mmlab/mmclassification/train_base_dataset',
         # ann_file='data/imagenet/meta/val.txt',
         pipeline=test_pipeline))
-# evaluation = dict(interval=1, metric='accuracy')  # accuracy  precision
-evaluation = dict(interval=1, metric='precision', metric_options={'topk': (1, 1)})
+
+# evaluation = dict(interval=1, metric='precision', metric_options={'topk': (1, 1)})
+evaluation = dict( #计算准确率
+    interval = 1,
+    metric = ['accuracy','precision','recall'],
+    metric_options = {'topk':(1,)},
+    save_best = "auto",
+    start = 1
+)
 
 # schedules
 # optimizer
@@ -72,4 +79,21 @@ lr_config = dict(policy='step', step=[30, 60, 90])
 runner = dict(type='EpochBasedRunner', max_epochs=100)
 
 
+# default_runtime
+# checkpoint saving
+checkpoint_config = dict(interval=10, max_keep_ckpts=50)
+# yapf:disable
+log_config = dict(
+    interval=100,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        # dict(type='TensorboardLoggerHook')
+    ])
+# yapf:enable
 
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+# work_dir = '/home/jony/workspace/Project/mmdetection/work_dirs/cascade_rcnn'
